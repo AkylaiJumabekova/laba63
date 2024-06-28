@@ -1,10 +1,11 @@
 import React from 'react';
+import Posts from '../Posts/Posts';
 
 const Home: React.FC = () => {
     return (
         <div>
             <h1>Home</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <Posts />
         </div>
     );
 };

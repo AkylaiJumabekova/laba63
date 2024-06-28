@@ -1,26 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosApi from '../../axios-api';
-
-interface PostData {
-    title: string;
-    content: string;
-}
+import Spinner from '../../components/Spinner/Spinner';
 
 const AddPost: React.FC = () => {
-    const [post, setPost] = useState<PostData>({ title: '', content: '' });
+    const [post, setPost] = useState({ title: '', content: '' });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setPost((prevState) => ({
-            ...prevState,
-            [name]: value,
-        }));
-    };
+    const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setPost(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }, []);
 
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
@@ -37,13 +29,13 @@ const AddPost: React.FC = () => {
             .catch(() => {
                 setLoading(false);
             });
-    };
+    }, [post, navigate]);
 
     return (
         <div>
             <h1>Add New Post</h1>
             {loading ? (
-                <p>Loading...</p>
+                <Spinner />
             ) : (
                 <form onSubmit={onSubmit}>
                     <div className="form-group">
@@ -69,9 +61,7 @@ const AddPost: React.FC = () => {
                             required
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary">
-                        Save
-                    </button>
+                    <button type="submit" className="btn btn-primary">Save</button>
                 </form>
             )}
         </div>

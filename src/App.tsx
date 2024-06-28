@@ -6,6 +6,8 @@ import AddPost from './containers/AddPost/AddPost';
 import EditPost from './containers/EditPost/EditPost';
 import About from './containers/About/About';
 import Contacts from './containers/Contacts/Contacts';
+import PostDetails from './containers/PostDetails/PostDetails';
+import Posts from './containers/Posts/Posts';
 
 const App: React.FC = () => {
   return (
@@ -17,6 +19,8 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/new-post" element={<AddPost />} />
+          <Route path="/posts" element={<Posts />} />
+          <Route path="/posts/:id" element={<PostDetails />} />
           <Route path="/posts/:id/edit" element={<EditPost />} />
           <Route path="/about" element={<About />} />
           <Route path="/contacts" element={<Contacts />} />
