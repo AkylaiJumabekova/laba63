@@ -1,59 +1,62 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosApi from '../../axios-api';
 import Spinner from '../../components/Spinner/Spinner';
 
-interface Post {
+interface PostData {
     title: string;
     content: string;
-    createdAt: string;
+    createdAt?: string;
 }
 
-const EditPost: React.FC = () => {
+const PostForm: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [post, setPost] = useState<Post | null>(null);
+    const [post, setPost] = useState<PostData>({ title: '', content: '' });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        setLoading(true);
-        axiosApi.get(`/posts/${id}.json`)
-            .then(response => {
-                setPost(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error(error);
-                setLoading(false);
-            });
+        if (id) {
+            setLoading(true);
+            axiosApi.get<PostData>(`/posts/${id}.json`)
+                .then(response => {
+                    setPost(response.data);
+                    setLoading(false);
+                })
+                .catch(() => setLoading(false));
+        }
     }, [id]);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setPost(prev => prev ? { ...prev, [e.target.name]: e.target.value } : null);
+        setPost(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const onSubmit = useCallback((e: React.FormEvent) => {
+    const onSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        if (post) {
-            axiosApi.put(`/posts/${id}.json`, post)
-                .then(() => {
-                    setLoading(false);
-                    navigate(`/posts/${id}`);
-                })
-                .catch(error => {
-                    console.error(error);
-                    setLoading(false);
-                });
+        const postData = {
+            ...post,
+            createdAt: post.createdAt || new Date().toISOString(),
+        };
+
+        try {
+            if (id) {
+                await axiosApi.put(`/posts/${id}.json`, postData);
+            } else {
+                await axiosApi.post('/posts.json', postData);
+            }
+            navigate('/');
+        } finally {
+            setLoading(false);
         }
     }, [post, id, navigate]);
 
-    const renderForm = () => {
-        if (loading) return <Spinner />;
-        if (!post) return <p>Loading post data...</p>;
+    if (loading) return <Spinner />;
 
-        return (
+    return (
+        <div>
+            <h1>{id ? 'Edit Post' : 'Add New Post'}</h1>
             <form onSubmit={onSubmit}>
                 <div className="form-group">
                     <label htmlFor="title">Title</label>
@@ -80,15 +83,8 @@ const EditPost: React.FC = () => {
                 </div>
                 <button type="submit" className="btn btn-primary">Save</button>
             </form>
-        );
-    };
-
-    return (
-        <div>
-            <h1>Edit Post</h1>
-            {renderForm()}
         </div>
     );
 };
 
-export default EditPost;
+export default PostForm;

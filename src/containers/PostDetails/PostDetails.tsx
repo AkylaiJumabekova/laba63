@@ -30,17 +30,14 @@ const PostDetails: React.FC = () => {
             });
     }, [id]);
 
-    const deletePost = () => {
+    const deletePost = async () => {
         setLoading(true);
-        axiosApi.delete(`/posts/${id}.json`)
-            .then(() => {
-                setLoading(false);
-                navigate('/');
-            })
-            .catch(error => {
-                console.error(error);
-                setLoading(false);
-            });
+        try {
+            await axiosApi.delete(`/posts/${id}.json`);
+            navigate('/');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const renderContent = () => {
